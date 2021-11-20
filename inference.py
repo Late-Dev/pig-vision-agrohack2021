@@ -15,7 +15,7 @@ def draw_predictions(new_frame, raw_result):
 
     fontScale = 1
     color = (0, 255, 0)
-    thickness = 2
+    thickness = 3
     font = cv2.FONT_HERSHEY_SIMPLEX
 
     full_mask = np.zeros(new_frame.shape[:2])
@@ -51,7 +51,7 @@ def draw_predictions(new_frame, raw_result):
 
         full_mask[y_min:y_max, x_min:x_max] += mask
 
-        cv2.rectangle(new_frame, (x_min, y_min), (x_max, y_max), color, 3)
+        cv2.rectangle(new_frame, (x_min, y_min), (x_max, y_max), color, thickness)
 
         org = (x_min, y_min)
 
@@ -59,7 +59,7 @@ def draw_predictions(new_frame, raw_result):
 
         pig_count += 1
 
-    cv2.putText(new_frame, f'Pig count: {pig_count}', (100, 50), font, fontScale, color, thickness, cv2.LINE_AA)
+    cv2.putText(new_frame, f'Pig count: {pig_count}', (1300, 200), font, fontScale, color, thickness, cv2.LINE_AA)
 
     full_mask = np.clip(full_mask, 0, 1).astype(np.uint8)
 
@@ -81,8 +81,8 @@ def run_inference(video_path):
     height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     fps = 10
-    fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-    writer = cv2.VideoWriter(f'output/{os.path.basename(video_path)}.mp4', fourcc, fps, (width, height))
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    writer = cv2.VideoWriter(f'output/{os.path.basename(video_path)}', fourcc, fps, (width, height))
 
     for _ in trange(length):
         ret, frame = capture.read()
