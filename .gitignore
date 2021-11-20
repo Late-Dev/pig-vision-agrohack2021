@@ -134,3 +134,4 @@ models/*
 *.pb
 
 *.txt
+data/*
