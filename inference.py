@@ -28,7 +28,7 @@ def build_pig_tracking_service():
     from service import PigMonitoringService
 
     pig_segmentator = MaskRCNN('models/mask_rcnn_inception_resnet_v2/saved_model/')
-    deep_sort_tracker = DeepsortTracker('tracking/model_data/mars-small128.pb')
+    deep_sort_tracker = DeepsortTracker('models/mars-small128.pb')
 
     pig_tracking_service = PigMonitoringService(pigs_segmentator=pig_segmentator, tracker=deep_sort_tracker)
     return pig_tracking_service

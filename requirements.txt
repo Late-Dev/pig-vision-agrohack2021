@@ -2,3 +2,4 @@ tensorflow
 numpy
 opencv-python
 tqdm
+scipy
