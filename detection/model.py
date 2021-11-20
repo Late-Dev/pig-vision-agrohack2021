@@ -46,10 +46,10 @@ class MaskRCNN:
             y_max, x_max = int(box[2] * img.shape[0]), int(box[3] * img.shape[1])
 
             mask = (mask > config.mask_proba_threshold).astype(np.uint8)
-            mask = cv2.resize(mask, (x_max - x_min, y_max - y_min))
+            # mask = cv2.resize(mask, (x_max - x_min, y_max - y_min))
 
             if not (config.visibility_zone[0][0] < (x_min + x_max) // 2 < config.visibility_zone[1][0]
-                and config.visibility_zone[0][1] < (y_min + y_max) // 2 < config.visibility_zone[1][1]):
+                    and config.visibility_zone[0][1] < (y_min + y_max) // 2 < config.visibility_zone[1][1]):
                 continue
 
             is_blind = False

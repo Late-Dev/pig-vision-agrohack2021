@@ -46,8 +46,10 @@ class DeepsortTracker:
             tracking_id = track.track_id # Get the ID for the particular track
             # index = key_list[val_list.index(class_name)] # Get predicted object index by object name
 
-            x_min, y_min, x_max, y_max = [int(i) for i in bbox.tolist()]
+            x_min, y_min, x_max, y_max = [min(max(int(i), 0), 1700) for i in bbox.tolist()]
+
             class_mask = cv2.resize(class_mask, (x_max - x_min, y_max - y_min))
+
             det_obj = Coords(
                 x_min=x_min,
                 y_min=y_min,

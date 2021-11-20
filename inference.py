@@ -100,7 +100,8 @@ def process_video(video_path: Path, tracking_service: PigMonitoringService):
         tracked_boxes = pig_tracking_service.process_frame(new_frame)
         
         for track_box in tracked_boxes:
-            track_mean_points.setdefault(track_box.tracking_id, []).append([(track_box.x_min+track_box.x_max) // 2, (track_box.y_min+track_box.y_max) // 2])
+            track_mean_points.setdefault(track_box.tracking_id, []).append([(track_box.x_min+track_box.x_max) // 2,
+                                                                            (track_box.y_min+track_box.y_max) // 2])
         
         frames_preds.append(tracked_boxes)
         new_frame = draw_predictions(new_frame, tracked_boxes, colormap, track_mean_points)
@@ -110,7 +111,6 @@ def process_video(video_path: Path, tracking_service: PigMonitoringService):
     writer.release()     
     capture.release()
     return frames_preds
-
 
 
 if __name__ == "__main__":
