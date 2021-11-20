@@ -18,6 +18,7 @@ class Coords:
     mask: np.array
     tracking_id: int = None
     class_name = "Pig"
+    activity: int = 0
 
     def __post_init__(self):
         self.width = self.x_max - self.x_min

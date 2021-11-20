@@ -2,11 +2,13 @@ import os
 import argparse
 import random
 from pathlib import Path
+from collections import Counter
 
 import cv2
 import numpy as np
 from tqdm import trange
 
+from activity.activity import get_activity
 from service import PigMonitoringService
 from save_script import savePredict
 
@@ -18,7 +20,6 @@ def get_parser():
     parser = argparse.ArgumentParser('Track pigs on video')
     parser.add_argument('--video_path', '-v', type=str, help='mp4 test file path')
     parser.add_argument('--out_path', '-op', type=str, help='output file path')
-    parser.add_argument('--out_name', '-on', type=str, help='output filename')
     return parser
 
 
@@ -42,32 +43,50 @@ def setColors_range(n_range: int):
 def draw_predictions(frame, coords, colormap, track_mean_points):
     from config import visibility_zone, blind_zones, probability_threshold, mask_proba_threshold
 
-    cv2.rectangle(frame, visibility_zone[0], visibility_zone[1], (0, 0, 255), 3)
-
     # for point1, point2 in blind_zones:
     #     cv2.rectangle(frame, point1, point2, (255, 0, 0), 3)
 
     fontScale = 1
-    thickness = 3
+    thickness = 4
     font = cv2.FONT_HERSHEY_SIMPLEX
 
     full_mask = np.zeros(frame.shape[:2])
 
     count = 0
+    colors = []
     for coord in coords:
-        color = colormap[coord.tracking_id]
+        #color = colormap[coord.tracking_id]
         mask = coord.mask
         x_min, y_min, x_max, y_max = coord.x_min, coord.y_min, coord.x_max, coord.y_max
 
         full_mask[y_min:y_max, x_min:x_max] += mask
-        
+
+        if coord.activity < 2:
+            color = (127, 127, 127)
+        elif 2 <= coord.activity < 5:
+            color = (0, 255, 0)
+        elif 5 <= coord.activity < 10:
+            color = (255, 255, 0)
+        else:
+            color = (255, 0, 0)
+
+        colors.append(color)
+
         cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), color, 3)
+
+        cv2.putText(frame, f'{coord.activity}', (x_min, y_max), font, fontScale, color, thickness, cv2.LINE_AA)
+        cv2.putText(frame, f'#{coord.tracking_id}', (x_min, y_min), font, fontScale, color, thickness, cv2.LINE_AA)
         
         if len(track_mean_points[coord.tracking_id]) > 1:
-            cv2.polylines(frame, np.array([track_mean_points[coord.tracking_id]]), False, color, thickness)
+            track_points = track_mean_points[coord.tracking_id]
+            if len(track_points) > 30:
+                track_points = track_points[-30:]
+            cv2.polylines(frame, np.array([track_points]), False, color, thickness)
 
         count += 1
 
+    most_common_color = Counter(colors).most_common(1)[0][0] if len(colors) > 0 else (0, 0, 0)
+    cv2.rectangle(frame, visibility_zone[0], visibility_zone[1], most_common_color, 3)
     cv2.putText(frame, f'Pig count: {count}', (1300, 200), font, fontScale, (0, 255, 0), thickness, cv2.LINE_AA)
 
     full_mask = np.clip(full_mask, 0, 1).astype(np.uint8)
@@ -80,7 +99,7 @@ def draw_predictions(frame, coords, colormap, track_mean_points):
 def process_video(video_path: Path, tracking_service: PigMonitoringService):
     frames_preds = []
     track_mean_points = {}
-    colormap = setColors_range(150)
+    colormap = setColors_range(1500)
 
     capture = cv2.VideoCapture(video_path)
     length = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -102,6 +121,7 @@ def process_video(video_path: Path, tracking_service: PigMonitoringService):
         for track_box in tracked_boxes:
             track_mean_points.setdefault(track_box.tracking_id, []).append([(track_box.x_min+track_box.x_max) // 2,
                                                                             (track_box.y_min+track_box.y_max) // 2])
+            track_box.activity = get_activity(track_mean_points[track_box.tracking_id])
         
         frames_preds.append(tracked_boxes)
         new_frame = draw_predictions(new_frame, tracked_boxes, colormap, track_mean_points)
@@ -137,7 +157,7 @@ if __name__ == "__main__":
 
     savePredict(
         Path=args.out_path,
-        Name=args.out_name,
+        Name=os.path.basename(args.video_path)+'.hdf5',
         boxs=boxes,
         masks=masks,
         num_pigs=num_pigs,
