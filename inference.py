@@ -91,7 +91,7 @@ def process_video(video_path: Path, tracking_service: PigMonitoringService):
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     writer = cv2.VideoWriter(f'output/{os.path.basename(video_path)}', fourcc, fps, (width, height))
 
-    for _ in trange(60, desc='Processing video...'):
+    for _ in trange(length, desc='Processing video...'):
         ret, frame = capture.read()
         if frame is None:
             break
