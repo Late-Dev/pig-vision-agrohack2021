@@ -1,4 +1,3 @@
-# vim: expandtab:ts=4:sw=4
 import numpy as np
 
 
@@ -28,14 +27,18 @@ class Detection(object):
 
     """
 
-    def __init__(self, tlwh, confidence, class_name, feature):
+    def __init__(self, tlwh, confidence, class_name, feature, mask):
         self.tlwh = np.asarray(tlwh, dtype=np.float)
         self.confidence = float(confidence)
         self.class_name = class_name
         self.feature = np.asarray(feature, dtype=np.float32)
+        self.mask = mask
 
     def get_class(self):
         return self.class_name
+
+    def get_mask(self):
+        return self.mask
 
     def to_tlbr(self):
         """Convert bounding box to format `(min x, min y, max x, max y)`, i.e.,
