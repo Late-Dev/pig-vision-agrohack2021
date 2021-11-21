@@ -117,6 +117,7 @@ def process_video(video_path: Path, tracking_service: PigMonitoringService):
         new_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         
         tracked_boxes = pig_tracking_service.process_frame(new_frame)
+        tracked_boxes.sort(key=lambda x: x.tracking_id)
         
         for track_box in tracked_boxes:
             track_mean_points.setdefault(track_box.tracking_id, []).append([(track_box.x_min+track_box.x_max) // 2,
