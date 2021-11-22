@@ -19,7 +19,7 @@
 Также в `output/` будет создано видео с визуализацией работы алгоритма.
 
 ### Пример работы
-![example](images/exp_0.png "Title")
+![example](images/Movie_3.gif "Title")
 
 Каждое животное выделено в свой bounding box и подсвечено маской.
 
