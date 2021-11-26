@@ -40,15 +40,15 @@ class DeepsortTracker:
         for track in self.tracker.tracks:
             if not track.is_confirmed() or track.time_since_update > 5:
                 continue 
-            bbox = track.to_tlbr() # Get the corrected/predicted bounding box
+            bbox = track.detection.to_tlbr() # Get the corrected/predicted bounding box
             class_name = track.get_class() #Get the class name of particular object
-            class_mask = track.get_mask()
+            mask = track.detection.mask
             tracking_id = track.track_id # Get the ID for the particular track
             # index = key_list[val_list.index(class_name)] # Get predicted object index by object name
 
             x_min, y_min, x_max, y_max = [min(max(int(i), 0), 1700) for i in bbox.tolist()]
 
-            class_mask = cv2.resize(class_mask, (x_max - x_min, y_max - y_min))
+            mask = cv2.resize(mask, (x_max - x_min, y_max - y_min))
 
             det_obj = Coords(
                 x_min=x_min,
@@ -57,7 +57,7 @@ class DeepsortTracker:
                 y_max=y_max,
                 score=None,
                 tracking_id=tracking_id,
-                mask=class_mask
+                mask=mask
                 )
             tracked_bboxes.append(det_obj) # Structure data, that we could use it with our draw_bbox function
         return tracked_bboxes
